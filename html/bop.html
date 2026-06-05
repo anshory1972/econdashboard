@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Indonesia Economic Dashboard — Balance of Payments</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1a1814;--ink-light:#4a4740;--ink-faint:#8a8780;--paper:#f5f2ec;--paper-warm:#ede9e0;--paper-card:#faf8f4;--rule:#d8d3c8;--accent:#b5460f;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--paper);color:var(--ink);font-family:'DM Sans',sans-serif;font-weight:300;font-size:15px;line-height:1.7;}
+/* ── Main nav ── */
+#mainNav{background:#1a1814;border-bottom:3px solid var(--accent);position:sticky;top:0;z-index:100;}
+.mn-brand-row{padding:.6rem 2rem .4rem;text-align:center;}
+.mn-brand{font-family:'DM Mono',monospace;font-size:13px;color:var(--paper);letter-spacing:.2em;text-transform:uppercase;font-weight:500;}
+.mn-brand em{font-style:normal;color:var(--accent);margin-right:.6em;}
+.mn-tabs-row{padding:.3rem 2rem .5rem;display:flex;gap:3px;justify-content:center;}
+.mn-tab{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+          padding:5px 20px;border-radius:3px;cursor:pointer;border:none;background:transparent;
+          color:rgba(245,242,236,.45);transition:all .15s;text-decoration:none;display:inline-block;}
+.mn-tab:hover{color:var(--paper);background:rgba(255,255,255,.08);}
+.mn-tab.active{background:var(--accent);color:var(--paper);}
+.mn-tab.disabled{color:rgba(245,242,236,.18);cursor:default;pointer-events:none;}
+/* ── Shared header ── */
+header{background:var(--ink);color:var(--paper);padding:2.5rem 3rem 2rem;text-align:center;}
+.header-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:.75rem;}
+header h1{font-family:'Playfair Display',serif;font-size:2rem;font-weight:400;line-height:1.2;margin-bottom:1rem;}
+header h1 em{font-style:italic;color:rgba(245,242,236,.6);}
+/* ── Window bar ── */
+.window-bar{position:sticky;top:78px;z-index:50;background:var(--paper-warm);border-bottom:1px solid var(--rule);padding:.5rem 2rem .6rem;display:flex;flex-direction:column;align-items:center;gap:.35rem;}
+.window-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-faint);}
+.window-btns{display:flex;gap:4px;}
+.wbtn{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;padding:4px 14px;border-radius:2px;cursor:pointer;border:1px solid var(--rule);background:var(--paper-card);color:var(--ink-light);transition:all .15s;}
+.wbtn:hover{background:var(--paper-warm);border-color:var(--ink-faint);color:var(--ink);}
+.wbtn.active{background:var(--ink);border-color:var(--ink);color:var(--paper);font-weight:500;}
+/* ── Layout ── */
+.container{max-width:1200px;margin:0 auto;padding:2rem 2rem 5rem;}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:2.5rem;}
+.kpi{background:var(--paper-card);padding:1.25rem 1.5rem;}
+.kpi-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:.4rem;}
+.kpi-value{font-family:'Playfair Display',serif;font-size:2rem;font-weight:400;}
+.kpi-value.pos{color:#2d5a27;}.kpi-value.neg{color:#b5460f;}
+.kpi-sub{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-faint);margin-top:.3rem;}
+.kpi-delta{font-family:'DM Mono',monospace;font-size:11px;margin-top:.2rem;}
+.kpi-delta.pos{color:#2d5a27;}.kpi-delta.neg{color:#b5460f;}
+.block{margin-bottom:3rem;}
+.block-header{display:flex;align-items:baseline;gap:1rem;margin-bottom:1.5rem;padding-bottom:.6rem;border-bottom:2px solid var(--ink);}
+.block-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-faint);letter-spacing:.1em;min-width:28px;}
+.block-title{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:400;}
+.chart-wrap,.chart-full{background:var(--paper-card);border:1px solid var(--rule);border-radius:4px;padding:1.5rem;}
+.chart-wrap h3,.chart-full h3{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:1rem;}
+.chart-note{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink-faint);margin-top:.75rem;}
+.chart-with-comment{display:flex;gap:1.5rem;align-items:flex-start;}
+.chart-with-comment .chart-full,.chart-with-comment .chart-wrap{flex:1;min-width:0;}
+/* BOP comment boxes always visible */
+.comment-box{display:block;}
+.comment-box{width:260px;flex-shrink:0;background:var(--paper-card);border:1px solid var(--rule);border-left:3px solid var(--accent);border-radius:0 4px 4px 0;padding:1.25rem;}
+.comment-box .cb-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:.75rem;}
+.comment-box p{font-size:12.5px;color:var(--ink-light);line-height:1.6;margin-bottom:.5rem;}
+.comment-box p:last-child{margin-bottom:0;}
+.comment-box strong{color:var(--ink);font-weight:500;}.comment-box em{font-style:normal;color:var(--ink);font-weight:500;}
+/* Snapshot */
+.snap-group{margin-bottom:3rem;}.snap-group-header{display:flex;align-items:baseline;gap:1rem;margin-bottom:1.5rem;padding-bottom:.6rem;border-bottom:2px solid var(--ink);}
+.snap-group-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-faint);letter-spacing:.1em;min-width:28px;}
+.snap-group-title{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:400;}
+.snap-body{display:flex;gap:1.5rem;align-items:flex-start;}
+.snap-comment{width:260px;flex-shrink:0;background:var(--paper-card);border:1px solid var(--rule);border-left:3px solid var(--accent);border-radius:0 4px 4px 0;padding:1.25rem;}
+.snap-comment .cb-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:.75rem;}
+.snap-comment p{font-size:12.5px;color:var(--ink-light);line-height:1.6;margin-bottom:.5rem;}
+.snap-comment strong{color:var(--ink);font-weight:500;}.snap-comment em{font-style:normal;color:var(--ink);font-weight:500;}
+.snap-charts{flex:1;min-width:0;display:flex;flex-direction:column;gap:1.25rem;}
+.snap-chart-wrap{background:var(--paper-card);border:1px solid var(--rule);border-radius:4px;padding:1.25rem;}
+.snap-chart-wrap h3{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:.75rem;}
+footer{background:var(--paper-warm);border-top:1px solid var(--rule);padding:1.25rem 3rem;font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-faint);display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem;}
+@media(max-width:900px){
+  .chart-with-comment,.snap-body{flex-direction:column;}
+  .comment-box,.snap-comment{width:100%;}
+  .kpi-row{grid-template-columns:repeat(2,1fr);}
+  header{padding:2rem 1.5rem;}
+}
+</style>
+</head>
+<body>
+
+<div id="mainNav">
+  <div class="mn-brand-row">
+    <span class="mn-brand"><em>AAY</em>Indonesia Economic Dashboard</span>
+  </div>
+  <div class="mn-tabs-row">
+    <a href="econdashboard.html" class="mn-tab">GDP</a>
+    <a href="bop.html" class="mn-tab active">BoP</a>
+    <a href="financial.html" class="mn-tab">Financial</a>
+    <span class="mn-tab disabled">Prices</span>
+    <span class="mn-tab disabled">Fiscal</span>
+  </div>
+</div>
+
+<header>
+  <div class="header-label">External Sector — Balance of Payments</div>
+  <h1>Balance of Payments and Its Components</h1>
+</header>
+
+<div class="window-bar">
+  <span class="window-label">Analytical window</span>
+  <div class="window-btns">
+    <button class="wbtn" onclick="setBOPWindow('snap')" id="bopBtnSnap" style="border-right:2px solid var(--rule);margin-right:4px;padding-right:16px;">Latest Quarter · 2026-Q1</button>
+    <button class="wbtn active" id="bopBtn2y" onclick="setBOPWindow(8)">Short · 2Y</button>
+    <button class="wbtn" id="bopBtn4y" onclick="setBOPWindow(16)">Medium · 4Y</button>
+    <button class="wbtn" id="bopBtnAll" onclick="setBOPWindow(0)">All · 2010–2026-Q1</button>
+  </div>
+</div>
+
+<div id="bopTabTS">
+<div class="container">
+  <div class="kpi-row" style="margin-top:1.5rem;">
+    <div class="kpi"><div class="kpi-label">Current Account</div>
+      <div class="kpi-value neg">-4,008</div>
+      <div class="kpi-sub">2026-Q1 · USD mn</div>
+      <div class="kpi-delta neg">8Q avg -1,462</div></div>
+    <div class="kpi"><div class="kpi-label">Capital + Financial Account</div>
+      <div class="kpi-value neg">-4,924</div>
+      <div class="kpi-sub">2026-Q1 · USD mn</div>
+      <div class="kpi-delta neg">8Q avg +1,469</div></div>
+    <div class="kpi"><div class="kpi-label">Overall Balance</div>
+      <div class="kpi-value neg">-9,145</div>
+      <div class="kpi-sub">2026-Q1 · USD mn</div>
+      <div class="kpi-sub">VI. Neraca Keseluruhan</div></div>
+    <div class="kpi"><div class="kpi-label">Reserve Position</div>
+      <div class="kpi-value">148.2</div>
+      <div class="kpi-sub">2026-Q1 · USD bn end-period</div>
+      <div class="kpi-sub">Change: -9,145 mn (draw-down)</div></div>
+  </div>
+
+  <div class="block"><div class="block-header"><span class="block-num">01</span><h2 class="block-title">BOP Overview — CA, Capital+Financial, Overall Balance</h2></div>
+    <div class="chart-with-comment">
+      <div class="chart-full"><h3>Quarterly flows · USD million</h3>
+        <div style="position:relative;height:320px"><canvas id="bopChartBOP"></canvas></div>
+        <div class="chart-note">Quarterly, USD million. CA = I. Transaksi Berjalan. KA+FA = II+III. Balance = VI. Neraca Keseluruhan. Source: SEKI 5.1, BI.</div>
+      </div>
+      <div class="comment-box"><div class="cb-label" id="bopCmt01label"></div><div id="bopCmt01"></div></div>
+    </div>
+  </div>
+
+  <div class="block"><div class="block-header"><span class="block-num">02</span><h2 class="block-title">Current Account — Components</h2></div>
+    <div class="chart-with-comment">
+      <div class="chart-full"><h3>Stacked quarterly flows · USD million</h3>
+        <div style="position:relative;height:320px"><canvas id="bopChartCA"></canvas></div>
+        <div class="chart-note">Quarterly, USD million. A. Goods · B. Services · C. Primary Income · D. Secondary Income. Line = CA total. Source: SEKI 5.1, BI.</div>
+      </div>
+      <div class="comment-box"><div class="cb-label" id="bopCmt02label"></div><div id="bopCmt02"></div></div>
+    </div>
+  </div>
+
+  <div class="block"><div class="block-header"><span class="block-num">03</span><h2 class="block-title">Financial Account — Components</h2></div>
+    <div class="chart-with-comment">
+      <div class="chart-full"><h3>Stacked quarterly flows · USD million (positive = net inflow)</h3>
+        <div style="position:relative;height:320px"><canvas id="bopChartFA"></canvas></div>
+        <div class="chart-note">Quarterly, USD million. 1. Direct Investment · 2. Portfolio · 3. Derivatives · 4. Other Investment. Line = FA total. Source: SEKI 5.1, BI.</div>
+      </div>
+      <div class="comment-box"><div class="cb-label" id="bopCmt03label"></div><div id="bopCmt03"></div></div>
+    </div>
+  </div>
+
+  <div class="block"><div class="block-header"><span class="block-num">04</span><h2 class="block-title">Reserve Assets</h2></div>
+    <div class="chart-with-comment">
+      <div class="chart-full">
+        <h3>Quarterly change (left) · End-period level (right)</h3>
+        <div style="position:relative;height:220px"><canvas id="bopChartRes"></canvas></div>
+        <h3 style="margin-top:1.25rem">Months of Import &amp; Official Debt Coverage</h3>
+        <div style="position:relative;height:140px"><canvas id="bopChartMonths"></canvas></div>
+        <div class="chart-note">Quarterly, USD million. Sign flipped — positive = accumulation, negative = drawdown. Bottom: months of imports coverage. Source: SEKI 5.1, BI.</div>
+      </div>
+      <div class="comment-box"><div class="cb-label" id="bopCmt04label"></div><div id="bopCmt04"></div></div>
+    </div>
+  </div>
+</div>
+</div><!-- /bopTabTS -->
+
+<div id="bopTabSnap" style="display:none">
+<div class="container" style="padding-top:2rem">
+
+  <div class="snap-group">
+    <div class="snap-group-header"><span class="snap-group-num">01</span><h2 class="snap-group-title">BOP Summary</h2></div>
+    <div class="snap-body">
+      <div class="snap-comment"><div class="cb-label">Latest · 2026-Q1</div><p>Overall balance: <strong>-9,145 USD mn</strong> in <em>2026-Q1</em>.</p><p>CA deficit of <strong>-4,008</strong>; KA+FA: <strong>-4,924</strong>.</p><p>Net errors &amp; omissions: <strong>-213</strong> USD mn.</p></div>
+      <div class="snap-charts">
+        <div class="snap-chart-wrap"><h3>CA · KA+FA · Net Errors · Overall Balance (USD mn)</h3>
+          <div style="position:relative;height:220px"><canvas id="bopSnapBOP"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="snap-group">
+    <div class="snap-group-header"><span class="snap-group-num">02</span><h2 class="snap-group-title">Current Account — Components</h2></div>
+    <div class="snap-body">
+      <div class="snap-comment"><div class="cb-label">Latest · 2026-Q1</div><p>CA: <strong>-4,008 USD mn</strong>.</p><p>Goods: <strong>+7,975</strong> · Services: <strong>-4,583</strong>.</p><p>Primary income: <strong>-9,151</strong> · Secondary income: <strong>+1,751</strong>.</p><p>Goods surplus supports the CA; services and primary income add drag.</p></div>
+      <div class="snap-charts">
+        <div class="snap-chart-wrap"><h3>CA Components · incl. total for reference (USD mn)</h3>
+          <div style="position:relative;height:260px"><canvas id="bopSnapCA"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="snap-group">
+    <div class="snap-group-header"><span class="snap-group-num">03</span><h2 class="snap-group-title">Financial Account — Components</h2></div>
+    <div class="snap-body">
+      <div class="snap-comment"><div class="cb-label">Latest · 2026-Q1</div><p>FA: <strong>-4,929 USD mn</strong> (net outflow) in <em>2026-Q1</em>.</p><p>Direct Investment: <strong>+2,020</strong> · Portfolio: <strong>+730</strong>.</p><p>Other Investment: <strong>-7,800</strong> · Derivatives: <strong>+122</strong>.</p></div>
+      <div class="snap-charts">
+        <div class="snap-chart-wrap"><h3>FA Components · incl. total for reference (USD mn)</h3>
+          <div style="position:relative;height:260px"><canvas id="bopSnapFA"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="snap-group">
+    <div class="snap-group-header"><span class="snap-group-num">04</span><h2 class="snap-group-title">Reserve Assets</h2></div>
+    <div class="snap-body">
+      <div class="snap-comment"><div class="cb-label">Latest · 2026-Q1</div><p>Reserve change: <strong>-9,145 USD mn</strong> in <em>2026-Q1</em>.</p><p>Draw-down — reserves fell.</p><p>End-period position: <strong>148.2 USD bn</strong>.</p><p>Import coverage: <strong>5.79 months</strong>.</p></div>
+      <div class="snap-charts">
+        <div class="snap-chart-wrap"><h3>Reserve change (USD mn) — positive = accumulation, negative = draw-down</h3>
+          <div style="position:relative;height:160px"><canvas id="bopSnapRes"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div><!-- /bopTabSnap -->
+
+<footer>
+  <span>Indonesia Economic Dashboard</span>
+  <span>Source: SEKI BI, BPS, CEIC, Yahoo Finance</span>
+</footer>
+
+<script>
+const B = {"periods": ["2010-Q1", "2010-Q2", "2010-Q3", "2010-Q4", "2011-Q1", "2011-Q2", "2011-Q3", "2011-Q4", "2012-Q1", "2012-Q2", "2012-Q3", "2012-Q4", "2013-Q1", "2013-Q2", "2013-Q3", "2013-Q4", "2014-Q1", "2014-Q2", "2014-Q3", "2014-Q4", "2015-Q1", "2015-Q2", "2015-Q3", "2015-Q4", "2016-Q1", "2016-Q2", "2016-Q3", "2016-Q4", "2017-Q1", "2017-Q2", "2017-Q3", "2017-Q4", "2018-Q1", "2018-Q2", "2018-Q3", "2018-Q4", "2019-Q1", "2019-Q2", "2019-Q3", "2019-Q4", "2020-Q1", "2020-Q2", "2020-Q3", "2020-Q4", "2021-Q1", "2021-Q2", "2021-Q3", "2021-Q4", "2022-Q1", "2022-Q2", "2022-Q3", "2022-Q4", "2023-Q1", "2023-Q2", "2023-Q3", "2023-Q4", "2024-Q1", "2024-Q2", "2024-Q3", "2024-Q4", "2025-Q1", "2025-Q2", "2025-Q3", "2025-Q4", "2026-Q1"], "ca": [1890.52, 1341.57, 1042.63, 869.57, 2946.69, 273.33, 766.36, -2301.3, -3191.52, -8149.38, -5264.73, -7812.49, -6007.36, -10125.65, -8640.3, -4336.15, -4926.67, -9584.75, -7037.42, -5961.02, -4313.58, -4278.55, -4223.68, -4702.93, -4634.01, -5570.15, -4950.99, -1797.11, -2023.42, -4368.85, -4236.59, -5566.78, -4937.47, -7784.17, -8380.29, -9531.19, -6550.26, -8199.19, -7480.92, -8048.44, -3366.71, -2913.21, 996.59, 850.06, -1139.67, -1881.47, 5020.45, 1511.41, 724.05, 4282.99, 4709.35, 3498.75, 2944.53, -2345.28, -1260.36, -1380.55, -2419.91, -2998.73, -2022.76, -1142.09, -149.32, -2863.13, 3969.21, -2478.5, -4007.67], "ka_fa": [5587.57, 3736.45, 7408.08, 9793.87, 4764.46, 11583.48, -9456.2, 6744.48, 2122.49, 5003.93, 5825.71, 11956.5, 36.71, 8696.58, 4573.24, 8664.34, 6464.0, 14352.55, 14572.05, 9554.04, 5611.62, 1998.64, 61.87, 9187.61, 4419.2, 7107.19, 10064.78, 7755.18, 6652.12, 5348.41, 9597.57, 7133.93, 2193.78, 3113.14, 4008.45, 15903.8, 9876.07, 6743.83, 7433.9, 12548.85, -2997.01, 10989.45, 862.89, -934.06, 5837.11, 1543.19, 7323.75, -2131.65, -2012.39, -1691.72, -5581.92, 605.48, 4020.9, -4443.89, -481.55, 10778.5, -2363.67, 2609.1, 8119.87, 9615.52, -300.45, -4163.23, -8168.62, 8967.34, -4924.27], "errors": [-857.37, 342.53, -1495.84, 683.52, -45.09, 19.59, 4730.24, -8169.42, 35.38, 334.65, 273.34, -918.74, -644.2, -1047.7, 1421.83, 83.92, 528.92, -471.12, -1059.22, -1182.78, 5.1, -645.27, -403.54, 604.66, -71.96, 624.92, 594.47, -1452.67, -114.5, -240.98, -1.6, -593.29, -1110.94, 362.28, -14.47, -954.23, -906.42, -521.38, 1.16, -221.27, -2181.21, 1169.21, 193.1, -72.4, -632.89, -111.66, -1654.07, -223.67, -528.38, -201.78, -431.11, 626.14, -448.22, -582.65, 279.92, -780.54, -1186.6, -167.18, -230.16, -603.8, -337.39, 283.6, -2184.23, -417.02, -213.38], "balance": [6620.72, 5420.55, 6954.87, 11346.96, 7666.06, 11876.39, -3959.6, -3726.24, -1033.66, -2810.81, 834.32, 3225.26, -6614.84, -2476.77, -2645.23, 4412.11, 2066.25, 4296.69, 6475.41, 2410.25, 1303.14, -2925.18, -4565.35, 5089.34, -286.77, 2161.97, 5708.26, 4505.4, 4514.2, 738.59, 5359.38, 973.87, -3854.63, -4308.74, -4386.31, 5418.39, 2419.39, -1976.73, -45.86, 4279.14, -8544.93, 9245.45, 2052.57, -156.39, 4064.55, -449.95, 10690.13, -843.92, -1816.72, 2389.49, -1303.68, 4730.37, 6517.22, -7371.82, -1461.99, 8617.41, -5970.16, -556.8, 5866.96, 7869.63, -787.17, -6742.76, -6383.64, 6071.82, -9145.32], "res": [6620.72, 5420.55, 6954.87, 11346.96, 7666.06, 11876.39, -3959.6, -3726.24, -1033.66, -2810.81, 834.32, 3225.26, -6614.84, -2476.77, -2645.23, 4412.11, 2066.25, 4296.69, 6475.41, 2410.25, 1303.14, -2925.18, -4565.35, 5089.34, -286.77, 2161.97, 5708.26, 4505.4, 4514.2, 738.59, 5359.38, 973.87, -3854.63, -4308.74, -4386.31, 5418.39, 2419.39, -1976.73, -45.86, 4279.14, -8544.93, 9245.45, 2052.57, -156.39, 4064.55, -449.95, 10690.13, -843.92, -1816.72, 2389.49, -1303.68, 4730.37, 6517.22, -7371.82, -1461.99, 8617.41, -5970.16, -556.8, 5866.96, 7869.63, -787.17, -6742.76, -6383.64, 6071.82, -9145.32], "res_pos": [71823.18, 76321.22, 86550.62, 96206.83, 105709.23, 119654.9, 114502.56, 110123.0, 110493.45, 106502.19, 110172.05, 112781.03, 104799.86, 98095.1, 95675.33, 99386.71, 102591.87, 107678.11, 111164.46, 111861.6, 111553.65, 108029.62, 101719.53, 105931.02, 107542.59, 109788.72, 115671.35, 116361.53, 121805.61, 123093.69, 129402.34, 130196.35, 126003.2, 119839.03, 114847.52, 120654.27, 124539.31, 123823.27, 124332.33, 129183.28, 120968.88, 131718.36, 135153.15, 135896.66, 137095.31, 137092.52, 146869.99, 144905.38, 139128.75, 136379.33, 130782.1, 137233.27, 145189.07, 137540.51, 134856.19, 146383.75, 140389.51, 140177.28, 149922.06, 155719.38, 157089.82, 152566.6, 148736.93, 156470.97, 148150.16], "res_months": [0.0, 0.0, 0.0, 7.56, 7.85, 8.23, 7.38, 6.74, 6.4, 5.96, 6.12, 6.15, 5.73, 5.38, 5.2, 5.47, 5.73, 6.05, 6.31, 6.45, 6.64, 6.77, 6.75, 7.39, 7.72, 8.02, 8.5, 8.42, 8.57, 8.58, 8.6, 8.27, 7.63, 6.9, 6.27, 6.43, 6.69, 6.75, 6.93, 7.32, 6.98, 8.14, 9.12, 9.76, 9.66, 8.78, 8.64, 7.77, 6.97, 6.41, 5.73, 5.9, 6.23, 6.0, 6.0, 6.51, 6.21, 6.14, 6.4, 6.47, 6.46, 6.15, 5.97, 6.22, 5.79], "ca_goods": [7297.5, 6732.9, 7718.73, 9253.52, 8696.08, 9174.8, 9704.21, 6249.92, 3967.79, 789.46, 3138.43, 783.83, 1602.06, -556.48, 84.77, 4702.89, 3349.64, -375.16, 1560.11, 2447.98, 3198.15, 4370.74, 4247.75, 2231.94, 2597.68, 3732.89, 3892.05, 5095.37, 5635.08, 4834.84, 5258.49, 3085.52, 2323.62, 311.86, -369.5, -2494.28, 1269.03, 570.51, 1362.4, 305.79, 4588.41, 3952.35, 9791.84, 9968.67, 7628.19, 8336.99, 15408.05, 12432.78, 11301.2, 16796.97, 17623.1, 16950.93, 14754.66, 9968.5, 10156.08, 11390.13, 9326.48, 10005.95, 9202.7, 11303.52, 13069.42, 10516.24, 16033.22, 10234.41, 7975.35], "ca_svcs": [-2474.1, -2183.17, -2298.67, -2834.57, -1278.02, -3125.09, -2587.53, -2812.64, -2173.7, -2813.78, -2346.68, -3230.04, -2633.18, -3551.59, -2780.91, -3104.8, -2131.41, -2831.19, -2485.78, -2561.32, -1823.09, -2828.86, -2292.66, -1752.06, -1171.56, -2449.87, -1723.55, -1738.69, -1106.27, -2049.26, -2088.51, -2135.12, -1339.17, -1681.28, -1816.51, -1648.12, -1521.77, -1868.79, -2246.16, -2004.08, -1735.09, -2147.59, -2768.0, -3104.8, -3446.36, -3660.0, -3530.61, -3961.54, -4334.75, -4971.69, -5259.66, -5391.02, -4480.92, -4534.17, -3894.77, -4766.24, -4213.98, -4977.73, -4188.05, -5105.38, -5483.28, -5267.95, -4365.66, -5348.84, -4582.96], "ca_primary": [-4012.83, -4306.46, -5528.76, -6850.11, -5500.79, -6735.89, -7395.42, -6915.06, -6015.94, -7049.17, -6916.59, -6646.13, -6052.37, -7020.1, -6805.84, -7172.04, -7230.11, -7912.55, -7315.6, -7244.35, -7116.36, -7246.08, -7451.91, -6564.78, -7290.7, -7969.61, -8123.78, -6262.93, -7677.62, -8146.54, -8554.32, -7752.09, -7365.53, -8047.26, -7971.85, -7430.51, -8128.48, -8898.92, -8423.4, -8323.87, -7911.68, -6158.32, -7398.54, -7442.03, -6753.17, -8023.23, -8274.43, -8909.8, -7734.12, -9003.61, -8930.67, -9634.49, -8775.95, -9206.59, -8776.51, -9255.64, -8836.78, -9458.72, -8558.21, -8961.67, -9288.83, -9791.54, -9429.16, -9118.76, -9150.61], "ca_second": [1079.94, 1098.3, 1151.33, 1300.73, 1029.42, 959.51, 1045.1, 1176.48, 1030.33, 924.11, 860.1, 1279.84, 1076.14, 1002.52, 861.68, 1237.81, 1085.21, 1534.15, 1203.84, 1396.67, 1427.72, 1425.66, 1273.14, 1381.97, 1230.57, 1116.45, 1004.29, 1109.14, 1125.4, 992.11, 1147.76, 1234.91, 1443.61, 1632.5, 1777.58, 2041.72, 1830.96, 1998.01, 1826.24, 1973.72, 1691.65, 1440.35, 1371.28, 1428.23, 1431.67, 1464.76, 1417.43, 1949.97, 1491.73, 1461.32, 1276.57, 1573.33, 1446.74, 1426.98, 1254.84, 1251.2, 1304.37, 1431.77, 1520.8, 1621.43, 1553.36, 1680.12, 1730.82, 1754.69, 1750.55], "fa": [5569.27, 3734.41, 7404.25, 9768.2, 4763.82, 11579.04, -9461.28, 6721.75, 2120.03, 4998.35, 5818.33, 11921.36, 35.46, 8689.47, 4568.5, 8632.15, 6462.77, 14345.34, 14568.8, 9539.17, 5610.69, 1998.35, 60.2, 9173.86, 4418.57, 7101.69, 10058.94, 7726.43, 6652.03, 5343.76, 9578.53, 7111.52, 2135.86, 3110.7, 4000.78, 15874.68, 9875.23, 6738.64, 7421.0, 12528.72, -2997.82, 10983.85, 856.17, -957.85, 5834.9, 1538.28, 7313.79, -2194.72, -2019.77, -1706.21, -5607.6, 176.84, 4018.55, -4451.15, -491.63, 10770.44, -2383.03, 2569.69, 8053.23, 9461.25, -343.91, -4230.5, -8237.42, 8794.82, -4928.65], "fa_di": [2555.9, 2367.57, 1763.93, 4418.93, 3781.76, 2507.28, 2118.92, 3120.44, 1550.34, 3652.59, 4451.93, 4061.37, 3261.15, 3323.23, 5415.11, 170.56, 2011.9, 4245.0, 5795.52, 2680.78, 2319.29, 3982.45, 1607.66, 2795.09, 2827.06, 3173.65, 6594.3, 3540.9, 2645.92, 4469.12, 6967.51, 4419.49, 4737.06, 2423.56, 4495.38, 854.61, 5906.58, 5765.8, 5246.07, 3612.62, 4312.39, 4487.76, 992.31, 4350.01, 4523.55, 5391.1, 3480.63, 3891.07, 4648.58, 6596.02, 3440.08, 3382.54, 4386.97, 3850.64, 2738.4, 3441.41, 4822.05, 2354.19, 5136.08, 3569.56, 2808.44, 3938.04, 4452.87, 3154.23, 2019.62], "fa_pi": [6159.35, 1088.67, 4517.08, 1436.89, 2919.99, 5212.53, -4570.94, 244.8, 2627.65, 3873.13, 2515.73, 189.91, 3820.48, 3793.2, 1512.94, 1745.99, 8729.96, 8046.24, 7408.86, 1881.57, 8508.53, 5528.46, -2187.61, 4333.3, 4437.88, 8303.74, 6562.88, -308.91, 6536.1, 8126.29, 3840.03, 2556.59, -1114.48, 106.11, -135.34, 10455.62, 5525.31, 4586.64, 4599.86, 7278.48, -6342.96, 9743.72, -1984.12, 1952.24, 4916.66, 3993.4, 1198.75, -5023.24, -3182.24, -3613.98, -3118.26, -1716.09, 3001.41, -2639.63, -3034.2, 4879.93, -2089.06, 3079.9, 9769.53, -2525.18, 1041.33, -8055.75, -7053.25, 4699.22, 730.3], "fa_der": [-74.36, -30.1, -56.05, 66.12, -70.17, -42.59, 116.51, 65.6, 29.4, 7.64, 27.85, -51.9, -100.95, 20.34, -235.21, -18.54, -140.36, 45.25, -20.13, -40.31, 92.88, -2.87, 230.87, -300.92, -21.84, -24.68, -28.13, 65.61, -71.98, 24.66, -11.61, -68.83, 60.14, 12.04, 90.92, -129.5, 81.25, 9.88, 86.05, 9.21, -326.45, 124.7, 18.02, 201.46, 110.06, 23.75, 172.24, 26.65, 136.76, -86.05, 8.55, -10.9, 204.92, -83.16, -53.21, 98.74, -420.61, 392.86, 330.85, -11.68, 189.54, -21.06, -181.97, -40.81, 121.66], "fa_oi": [-3071.62, 308.28, 1179.29, 3846.25, -1867.76, 3901.82, -7125.76, 3290.92, -2087.37, -2535.02, -1177.18, 7721.99, -6945.22, 1552.7, -2124.33, 6734.13, -4138.73, 2008.85, 1384.55, 5017.12, -5310.01, -7509.69, 409.29, 2346.39, -2824.52, -4351.02, -3070.11, 4428.83, -2458.01, -7276.31, -1217.39, 204.27, -1546.87, 568.99, -450.18, 4693.95, -1637.91, -3623.68, -2510.98, 1628.4, -640.8, -3372.33, 1829.95, -7461.56, -3715.38, -7869.98, 2462.17, -1089.2, -3622.87, -4602.19, -5937.97, -1478.7, -3574.75, -5579.0, -142.61, 2350.36, -4695.41, -3257.26, -7183.24, 8428.56, -4383.23, -91.73, -5455.07, 982.19, -7800.23]};
+
+const MONO = "'DM Mono', monospace";
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+Chart.defaults.color = '#8a8780';
+
+function xAxis() {
+  return {ticks:{font:{family:MONO,size:10},maxRotation:45,autoSkip:true,maxTicksLimit:12},grid:{color:'rgba(0,0,0,0.05)'}};
+}
+function yAxis(title) {
+  return {title:{display:true,text:title,font:{family:MONO,size:10},color:'#8a8780'},ticks:{font:{family:MONO,size:10}},grid:{color:'rgba(0,0,0,0.05)'}};
+}
+function legend() { return {labels:{font:{family:MONO,size:10},boxWidth:10,padding:10}}; }
+function legendRight() { return {position:'right',labels:{font:{family:MONO,size:10},boxWidth:10,padding:10}}; }
+
+/* ════════════════════════════════════════════
+   BOP CHARTS
+   ════════════════════════════════════════════ */
+let bopCharts=[], bopSnapBuilt=false;
+
+function setBOPWindow(n) {
+  const isSnap = n==='snap';
+  document.getElementById('bopTabTS').style.display   = isSnap ? 'none'  : 'block';
+  document.getElementById('bopTabSnap').style.display = isSnap ? 'block' : 'none';
+  ['bopBtnSnap','bopBtn2y','bopBtn4y','bopBtnAll'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  if (isSnap) {
+    document.getElementById('bopBtnSnap').classList.add('active');
+    if (!bopSnapBuilt) initBOPSnap();
+    return;
+  }
+  document.getElementById(n===8?'bopBtn2y':n===16?'bopBtn4y':'bopBtnAll').classList.add('active');
+  bopCharts.forEach(ch=>{
+    const sl=arr=>n===0?arr:(arr||[]).slice(-n);
+    ch.data.labels=sl(B.periods);
+    ch.data.datasets.forEach(ds=>{if(ds._full)ds.data=sl(ds._full);});
+    ch.update();
+  });
+  updateBOPCommentary(n);
+}
+
+function initBOPSnap() {
+  const li = B.ca.reduceRight((acc,v,i)=>acc===-1&&v!==null?i:acc,-1);
+
+  function bSD(labels, values) {
+    return {
+      label:'', data:values,
+      backgroundColor: values.map(v=>v!==null&&v>=0?'rgba(22,163,74,0.72)':'rgba(181,70,15,0.72)'),
+      borderColor:     values.map(v=>v!==null&&v>=0?'#16a34a':'#b5460f'),
+      borderWidth:1, borderRadius:2,
+    };
+  }
+  function bSOpts(suffix) {
+    return {
+      responsive:true, maintainAspectRatio:false, indexAxis:'y',
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.x!=null?ctx.parsed.x.toLocaleString('en-US',{maximumFractionDigits:0}):''} ${suffix}`}}
+      },
+      scales:{
+        x:{ticks:{font:{family:MONO,size:10},callback:v=>(Math.abs(v)>=1000?(v/1000).toFixed(1)+'k':v.toFixed(0))},grid:{color:'rgba(0,0,0,0.05)'}},
+        y:{ticks:{font:{family:MONO,size:10}},grid:{display:false}}
+      }
+    };
+  }
+
+  new Chart(document.getElementById('bopSnapBOP'), {
+    type:'bar',
+    data:{
+      labels:['Current Account','Capital+Financial','Net Errors','Overall Balance'],
+      datasets:[bSD(['CA','KA+FA','Err','Bal'],[B.ca[li],B.ka_fa[li],B.errors[li],B.balance[li]])]
+    },
+    options:bSOpts('USD mn')
+  });
+
+  new Chart(document.getElementById('bopSnapCA'), {
+    type:'bar',
+    data:{
+      labels:['A. Goods','B. Services','C. Primary Income','D. Secondary Income','CA Total'],
+      datasets:[bSD(['G','S','P','D','T'],[B.ca_goods[li],B.ca_svcs[li],B.ca_primary[li],B.ca_second[li],B.ca[li]])]
+    },
+    options:bSOpts('USD mn')
+  });
+
+  new Chart(document.getElementById('bopSnapFA'), {
+    type:'bar',
+    data:{
+      labels:['1. Direct Investment','2. Portfolio','3. Derivatives','4. Other Investment','FA Total'],
+      datasets:[bSD(['DI','PI','D','OI','T'],[B.fa_di[li],B.fa_pi[li],B.fa_der[li],B.fa_oi[li],B.fa[li]])]
+    },
+    options:bSOpts('USD mn')
+  });
+
+  new Chart(document.getElementById('bopSnapRes'), {
+    type:'bar',
+    data:{
+      labels:['Reserve Change'],
+      datasets:[bSD(['R'],[B.res[li]])]
+    },
+    options:bSOpts('USD mn')
+  });
+
+  bopSnapBuilt=true;
+}
+
+function updateBOPCommentary(n) {
+  const li = B.ca.reduceRight((acc,v,i) => acc===-1 && v!==null ? i : acc, -1);
+  const lp = B.periods[li];
+  const wlabel = n===0 ? 'full period shown' : n===8 ? 'past 2 years' : 'past 4 years';
+  const clabel = lp + ' · ' + (n===0 ? 'All' : n===8 ? '2Y' : '4Y');
+
+  function sl(arr) {
+    const out = (arr||[]).slice(0, li+1).filter(v => v!==null);
+    return n===0 ? out : out.slice(-n);
+  }
+
+  const avg  = a => a.length ? a.reduce((s,v)=>s+v,0)/a.length : 0;
+  const nNeg = a => a.filter(v=>v<0).length;
+  const nPos = a => a.filter(v=>v>0).length;
+  const mn   = a => a.length ? Math.min(...a) : 0;
+  const mx   = a => a.length ? Math.max(...a) : 0;
+  const sd   = a => { if(a.length<2)return 0; const m=avg(a); return Math.sqrt(a.reduce((s,v)=>s+(v-m)**2,0)/a.length); };
+
+  function b(v, unit, dec) {
+    if(v===null||v===undefined)return '—';
+    dec = dec||0; unit = unit||'';
+    const abs=Math.abs(v), s = abs>=10000 ? (v/1000).toFixed(1)+'k' : v.toFixed(dec);
+    return '<strong>'+(v>=0?'+':'')+s+(unit?' '+unit:'')+'</strong>';
+  }
+  function bn(v,dec) { dec=dec||1; return '<strong>'+v.toFixed(dec)+'</strong>'; }
+  const em = t => '<em>'+t+'</em>';
+  const p  = t => '<p>'+t+'</p>';
+
+  const ca_w   = sl(B.ca),   kafa_w = sl(B.ka_fa), bal_w  = sl(B.balance);
+  const gds_w  = sl(B.ca_goods), svcs_w = sl(B.ca_svcs);
+  const prim_w = sl(B.ca_primary), sec_w = sl(B.ca_second);
+  const fa_w   = sl(B.fa),   fadi_w = sl(B.fa_di), fapi_w = sl(B.fa_pi), faoi_w = sl(B.fa_oi);
+  const res_w  = sl(B.res),  pos_w  = sl(B.res_pos), mth_w = sl(B.res_months);
+
+  const ca_now = B.ca[li], ca_prv = B.ca[li-1]||null;
+  const ca_avg = avg(ca_w), bal_avg = avg(bal_w);
+  const ca_def = nNeg(ca_w), ca_len = ca_w.length;
+  const fa_avg = avg(fa_w), fa_pos = nPos(fa_w);
+  const fadi_avg = avg(fadi_w), fapi_avg = avg(fapi_w), faoi_avg = avg(faoi_w);
+  const fadi_sd = sd(fadi_w), fapi_sd = sd(fapi_w);
+  const mth_now = B.res_months[li], mth_avg = avg(mth_w), mth_min = mn(mth_w);
+  const res_now = B.res[li], res_acc = nPos(res_w);
+  const pos_now = B.res_pos[li], pos_first = pos_w[0];
+
+  // ── 01 BOP Overview ──────────────────────────────────────────────────────
+  const caMove = ca_prv!==null ? (ca_now > ca_prv ? 'narrowed' : 'widened') : '';
+  const caLabel = ca_def > ca_len*0.7 ? 'persistently in deficit' :
+                  ca_def > ca_len*0.4 ? 'frequently in deficit' : 'broadly balanced';
+  const finMsg  = nPos(kafa_w) >= ca_len*0.75
+    ? 'KA+FA inflows have reliably offset the deficit'
+    : 'KA+FA financing has been inconsistent, leaving the overall balance dependent on reserves';
+  const balMsg  = nNeg(bal_w) > ca_len*0.6
+    ? 'reserve drawdowns have been the rule rather than the exception'
+    : 'the overall balance has been roughly neutral on average';
+  document.getElementById('bopCmt01label').textContent = clabel;
+  document.getElementById('bopCmt01').innerHTML =
+    p('CA '+caMove+' to '+b(ca_now,'USD mn')+' in '+em(lp)+
+      ', vs a '+wlabel+' avg of '+b(ca_avg,'USD mn')+'.') +
+    p('The CA has been '+caLabel+' — deficit in '+
+      '<strong>'+ca_def+'</strong> of <strong>'+ca_len+'</strong> quarters. '+finMsg+'.') +
+    p('Overall balance averaged '+b(bal_avg,'USD mn')+': '+balMsg+'.');
+
+  // ── 02 Current Account Components ───────────────────────────────────────
+  const gds_avg = avg(gds_w), svcs_avg = avg(svcs_w);
+  const prim_avg = avg(prim_w), sec_avg = avg(sec_w);
+  const gds_now = B.ca_goods[li], svcs_now = B.ca_svcs[li];
+  const anchor = gds_avg > 0 ? 'Goods surplus (avg '+b(gds_avg,'USD mn')+') anchors the CA, though at '+b(gds_now,'USD mn')+' this quarter it is '+(gds_now < gds_avg ? 'below its average — a softening signal' : 'holding up') :
+                               'The goods account is in deficit (avg '+b(gds_avg,'USD mn')+'), removing a traditional CA anchor';
+  const structDrag = 'Services (avg '+b(svcs_avg,'USD mn')+') and primary income (avg '+b(prim_avg,'USD mn')+') are structural drags — reflecting shipping and tourism deficits alongside profit remittances to foreign investors.';
+  const remitt = sec_avg > 0 ? 'Worker remittances (secondary income avg '+b(sec_avg,'USD mn')+') provide a partial offset.' :
+                               'Secondary income offers limited support (avg '+b(sec_avg,'USD mn')+').';
+  document.getElementById('bopCmt02label').textContent = clabel;
+  document.getElementById('bopCmt02').innerHTML =
+    p(anchor+'.') + p(structDrag) + p(remitt);
+
+  // ── 03 Financial Account ─────────────────────────────────────────────────
+  const faReliable = fa_pos >= ca_len*0.7 ? 'reliably positive' :
+                     fa_pos >= ca_len*0.5 ? 'positive in most quarters but with reversals' : 'volatile and unreliable';
+  const fdiMsg = 'FDI averaged '+b(fadi_avg,'USD mn')+
+    ' with low volatility (std dev '+bn(fadi_sd/1000,1)+'k), reflecting stable long-term investment commitments.';
+  const piMsg  = 'Portfolio flows averaged '+b(fapi_avg,'USD mn')+
+    ' but with much higher volatility (std dev '+bn(fapi_sd/1000,1)+'k) — '+
+    (fapi_sd > fadi_sd*1.5 ? 'more than '+ bn(fapi_sd/fadi_sd,1)+'× more volatile than FDI, making them the key risk factor in a sentiment shift.' :
+     'a meaningful swing factor.');
+  const oiMsg  = 'Other investment (avg '+b(faoi_avg,'USD mn')+') captures banking and trade credit flows.';
+  document.getElementById('bopCmt03label').textContent = clabel;
+  document.getElementById('bopCmt03').innerHTML =
+    p('FA was '+faReliable+' (positive in <strong>'+fa_pos+'/'+ca_len+'</strong> quarters), averaging '+b(fa_avg,'USD mn')+'.') +
+    p(fdiMsg) + p(piMsg) + p(oiMsg);
+
+  // ── 04 Reserve Assets ────────────────────────────────────────────────────
+  const resDir  = res_now > 0 ? 'built up' : 'drew down';
+  const resTrend = res_acc >= res_w.length*0.6
+    ? 'Reserves were accumulated in <strong>'+res_acc+'/'+res_w.length+'</strong> quarters — a broadly defensive posture'
+    : 'Reserve changes have been mixed (accumulation in <strong>'+res_acc+'/'+res_w.length+'</strong> quarters)';
+  const posChg  = pos_w.length>=2 ? pos_now - pos_first : null;
+  const posMsg  = posChg!==null
+    ? 'The stock '+(posChg>=0?'rose':'fell')+' by '+b(Math.abs(posChg/1000),null,1)+'k USD mn over the '+wlabel+'.'
+    : '';
+  const adequacy = mth_now < 3 ? 'below the 3-month minimum threshold — a serious vulnerability' :
+                   mth_now < 5 ? 'above the minimum but approaching the lower bound of comfort (5 months)' :
+                   mth_now < 7 ? 'within the comfortable 5–7 month range' : 'well above the 6-month adequacy standard';
+  const mthTrend = mth_now < mth_avg - 0.3 ? 'Coverage has been declining — worth monitoring.' :
+                   mth_now > mth_avg + 0.3 ? 'Coverage has improved over the window.' : 'Coverage has been relatively stable.';
+  document.getElementById('bopCmt04label').textContent = clabel;
+  document.getElementById('bopCmt04').innerHTML =
+    p('Indonesia '+resDir+' reserves by '+b(Math.abs(res_now),'USD mn')+' in '+em(lp)+'. '+resTrend+'. '+posMsg) +
+    p('At '+bn(mth_now)+' months of import coverage — '+adequacy+'. Avg over '+wlabel+': '+bn(mth_avg)+' months (min '+bn(mth_min)+').') +
+    p(mthTrend);
+}
+
+function bopDS(label,full,color,opts={}) {
+  return {label,data:(full||[]).slice(-8),borderColor:color,backgroundColor:color,_full:full,...opts};
+}
+
+// Chart 01: BOP Overview
+bopCharts.push(new Chart(document.getElementById('bopChartBOP'),{
+  type:'bar',
+  data:{labels:B.periods.slice(-8),datasets:[
+    bopDS('Current Account',B.ca,'#2563eb',{backgroundColor:B.ca.map(()=>'rgba(37,99,235,0.72)'),borderWidth:0.5,borderRadius:1,order:2}),
+    bopDS('Capital+Financial',B.ka_fa,'#16a34a',{backgroundColor:B.ka_fa.map(()=>'rgba(22,163,74,0.68)'),borderWidth:0.5,borderRadius:1,order:3}),
+    bopDS('Net Errors',B.errors,'#d4cec6',{backgroundColor:'rgba(139,132,124,0.45)',borderWidth:0.5,borderRadius:1,order:4}),
+    bopDS('Overall Balance',B.balance,'#1a1814',{type:'line',borderWidth:2,pointRadius:2,pointHoverRadius:5,tension:0,fill:false,order:1}),
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    plugins:{legend:legendRight(),tooltip:{backgroundColor:'rgba(26,24,20,0.92)',titleFont:{family:MONO,size:11},bodyFont:{family:MONO,size:12},padding:12,
+      itemSort:(a,b)=>b.parsed.y-a.parsed.y,callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y!=null?ctx.parsed.y.toLocaleString('en-US',{maximumFractionDigits:0}):''} USD mn`}}},
+    scales:{x:xAxis(),y:{...yAxis('USD million'),ticks:{font:{family:MONO,size:10},callback:v=>(v/1000).toFixed(0)+'k'}}}}
+}));
+
+// Chart 02: CA Components
+bopCharts.push(new Chart(document.getElementById('bopChartCA'),{
+  type:'bar',
+  data:{labels:B.periods.slice(-8),datasets:[
+    bopDS('A. Goods',B.ca_goods,'#2563eb',{backgroundColor:'rgba(37,99,235,0.72)',borderWidth:0.5,stack:'ca',order:2}),
+    bopDS('B. Services',B.ca_svcs,'#dc2626',{backgroundColor:'rgba(220,38,38,0.72)',borderWidth:0.5,stack:'ca',order:2}),
+    bopDS('C. Primary Income',B.ca_primary,'#9333ea',{backgroundColor:'rgba(147,51,234,0.72)',borderWidth:0.5,stack:'ca',order:2}),
+    bopDS('D. Secondary Income',B.ca_second,'#16a34a',{backgroundColor:'rgba(22,163,74,0.72)',borderWidth:0.5,stack:'ca',order:2}),
+    bopDS('CA Total',B.ca,'#1a1814',{type:'line',borderWidth:2,pointRadius:2,pointHoverRadius:5,tension:0,fill:false,order:1}),
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    plugins:{legend:legendRight(),tooltip:{backgroundColor:'rgba(26,24,20,0.92)',titleFont:{family:MONO,size:11},bodyFont:{family:MONO,size:12},padding:12,
+      itemSort:(a,b)=>b.parsed.y-a.parsed.y,callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y!=null?ctx.parsed.y.toLocaleString('en-US',{maximumFractionDigits:0}):''} USD mn`}}},
+    scales:{x:xAxis(),y:{...yAxis('USD million'),stacked:true,ticks:{font:{family:MONO,size:10},callback:v=>(v/1000).toFixed(0)+'k'}}}}
+}));
+
+// Chart 03: FA Components
+bopCharts.push(new Chart(document.getElementById('bopChartFA'),{
+  type:'bar',
+  data:{labels:B.periods.slice(-8),datasets:[
+    bopDS('1. Direct Investment',B.fa_di,'#0e7490',{backgroundColor:'rgba(14,116,144,0.72)',borderWidth:0.5,stack:'fa',order:2}),
+    bopDS('2. Portfolio',B.fa_pi,'#7c3aed',{backgroundColor:'rgba(124,58,237,0.72)',borderWidth:0.5,stack:'fa',order:2}),
+    bopDS('3. Derivatives',B.fa_der,'#ca8a04',{backgroundColor:'rgba(202,138,4,0.72)',borderWidth:0.5,stack:'fa',order:2}),
+    bopDS('4. Other Investment',B.fa_oi,'#b5460f',{backgroundColor:'rgba(181,70,15,0.72)',borderWidth:0.5,stack:'fa',order:2}),
+    bopDS('FA Total',B.fa,'#1a1814',{type:'line',borderWidth:2,pointRadius:2,pointHoverRadius:5,tension:0,fill:false,order:1}),
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    plugins:{legend:legendRight(),tooltip:{backgroundColor:'rgba(26,24,20,0.92)',titleFont:{family:MONO,size:11},bodyFont:{family:MONO,size:12},padding:12,
+      itemSort:(a,b)=>b.parsed.y-a.parsed.y,callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y!=null?ctx.parsed.y.toLocaleString('en-US',{maximumFractionDigits:0}):''} USD mn`}}},
+    scales:{x:xAxis(),y:{...yAxis('USD million'),stacked:true,ticks:{font:{family:MONO,size:10},callback:v=>(v/1000).toFixed(0)+'k'}}}}
+}));
+
+// Chart 04: Reserves
+bopCharts.push(new Chart(document.getElementById('bopChartRes'),{
+  type:'bar',
+  data:{labels:B.periods.slice(-8),datasets:[
+    bopDS('Reserve Change',B.res,'#0e7490',{
+      backgroundColor:B.res.map(v=>v===null?null:v>0?'rgba(14,116,144,0.72)':'rgba(181,70,15,0.72)'),
+      borderColor:B.res.map(v=>v===null?null:v>0?'#0e7490':'#b5460f'),
+      borderWidth:0.5,borderRadius:1,order:2,yAxisID:'y'}),
+    bopDS('Reserve Position',B.res_pos,'#ca8a04',{type:'line',borderWidth:1.8,pointRadius:0,pointHoverRadius:4,tension:0,fill:false,order:1,yAxisID:'y2',borderDash:[4,3]}),
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    plugins:{legend:legend(),tooltip:{backgroundColor:'rgba(26,24,20,0.92)',titleFont:{family:MONO,size:11},bodyFont:{family:MONO,size:12},padding:12,
+      callbacks:{label:ctx=>{const v=ctx.parsed.y;if(v==null)return'';return ctx.datasetIndex===0?` Change: ${v.toLocaleString('en-US',{maximumFractionDigits:0})} USD mn`:` Position: ${(v/1000).toFixed(1)} USD bn`;}}}},
+    scales:{x:xAxis(),
+      y:{...yAxis('Change (USD mn)'),position:'left',ticks:{font:{family:MONO,size:10},callback:v=>(v/1000).toFixed(0)+'k'}},
+      y2:{...yAxis('Position (USD mn)'),position:'right',grid:{drawOnChartArea:false},ticks:{font:{family:MONO,size:10},callback:v=>(v/1000).toFixed(0)+'k'}}}}
+}));
+
+// Chart 04b: Months of import
+bopCharts.push(new Chart(document.getElementById('bopChartMonths'),{
+  type:'line',
+  data:{
+    labels:B.periods.slice(-8),
+    datasets:[
+      bopDS('Months of import & official debt coverage',B.res_months,'#7c3aed',{
+        borderWidth:2,pointRadius:3,pointHoverRadius:5,tension:0,fill:false,
+        backgroundColor:'rgba(124,58,237,0.08)'
+      }),
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        backgroundColor:'rgba(26,24,20,0.92)',
+        titleFont:{family:MONO,size:11},bodyFont:{family:MONO,size:12},padding:12,
+        callbacks:{label:ctx=>` ${ctx.parsed.y!=null?ctx.parsed.y.toFixed(2):''} months`}
+      }
+    },
+    scales:{
+      x:xAxis(),
+      y:{
+        title:{display:true,text:'Months',font:{family:MONO,size:10},color:'#8a8780'},
+        ticks:{font:{family:MONO,size:10},callback:v=>v.toFixed(1)},
+        grid:{color:'rgba(0,0,0,0.05)'},
+        suggestedMin:3, suggestedMax:10
+      }
+    }
+  }
+}));
+
+// Init default window (2Y)
+setBOPWindow(8);
+</script>
+</body>
+</html>
