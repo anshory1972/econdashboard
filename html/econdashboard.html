@@ -23,15 +23,15 @@ body{background:var(--paper);color:var(--ink);font-family:'DM Sans',sans-serif;f
 .mn-tab.active{background:var(--accent);color:var(--paper);}
 .mn-tab.disabled{color:rgba(245,242,236,.18);cursor:default;pointer-events:none;}
 /* ── Shared header ── */
-header{background:var(--ink);color:var(--paper);padding:2.5rem 3rem 2rem;}
+header{background:var(--ink);color:var(--paper);padding:2.5rem 3rem 2rem;text-align:center;}
 .header-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:.75rem;}
 header h1{font-family:'Playfair Display',serif;font-size:2rem;font-weight:400;line-height:1.2;margin-bottom:1rem;}
 header h1 em{font-style:italic;color:rgba(245,242,236,.6);}
-.header-meta{display:flex;gap:2rem;flex-wrap:wrap;}
+.header-meta{display:flex;gap:2rem;flex-wrap:wrap;justify-content:center;}
 .hm{font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,242,236,.5);letter-spacing:.08em;}
 .hm span{color:rgba(245,242,236,.9);display:block;font-size:13px;margin-top:2px;}
 /* ── Window bar ── */
-.window-bar{position:sticky;top:78px;z-index:50;background:var(--paper-warm);border-bottom:1px solid var(--rule);padding:.6rem 2rem;display:flex;align-items:center;gap:1.5rem;}
+.window-bar{position:sticky;top:78px;z-index:50;background:var(--paper-warm);border-bottom:1px solid var(--rule);padding:.5rem 2rem .6rem;display:flex;flex-direction:column;align-items:center;gap:.35rem;}
 .window-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-faint);}
 .window-btns{display:flex;gap:4px;}
 .wbtn{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;padding:4px 14px;border-radius:2px;cursor:pointer;border:1px solid var(--rule);background:var(--paper-card);color:var(--ink-light);transition:all .15s;}
@@ -107,9 +107,6 @@ footer{background:var(--paper-warm);border-top:1px solid var(--rule);padding:1.2
 <header>
   <div class="header-label">Real Sector — National Accounts</div>
   <h1>Gross Domestic Product and Its Determinants</h1>
-  <div class="header-meta">
-    <div class="hm">Source <span>SEKI BI, BPS, CEIC</span></div>
-  </div>
 </header>
 
 <div class="window-bar">
@@ -293,14 +290,8 @@ footer{background:var(--paper-warm);border-top:1px solid var(--rule);padding:1.2
 <div id="sectionBOP" style="display:none">
 
 <header>
-  <div class="header-label">SEKI Table 5.1 · Bank Indonesia</div>
-  <h1>Balance of Payments<br><em>Quarterly Flows · USD Million</em></h1>
-  <div class="header-meta">
-    <div class="hm">Source <span>SEKI April 2026 · Bank Indonesia</span></div>
-    <div class="hm">Frequency <span>Quarterly</span></div>
-    <div class="hm">Coverage <span>2010 Q1 – 2026-Q1</span></div>
-    <div class="hm">Unit <span>USD Million</span></div>
-  </div>
+  <div class="header-label">External Sector — Balance of Payments</div>
+  <h1>Balance of Payments and Its Components</h1>
 </header>
 
 <div class="window-bar">
@@ -338,7 +329,7 @@ footer{background:var(--paper-warm);border-top:1px solid var(--rule);padding:1.2
     <div class="chart-with-comment">
       <div class="chart-full"><h3>Quarterly flows · USD million</h3>
         <div style="position:relative;height:320px"><canvas id="bopChartBOP"></canvas></div>
-        <div class="chart-note">CA = I. Transaksi Berjalan. KA+FA = II+III. Balance = VI. Neraca Keseluruhan. Source: SEKI 5.1.</div>
+        <div class="chart-note">Quarterly, USD million. CA = I. Transaksi Berjalan. KA+FA = II+III. Balance = VI. Neraca Keseluruhan. Source: SEKI 5.1, BI.</div>
       </div>
       <div class="comment-box"><div class="cb-label" id="bopCmt01label"></div><div id="bopCmt01"></div></div>
     </div>
@@ -348,7 +339,7 @@ footer{background:var(--paper-warm);border-top:1px solid var(--rule);padding:1.2
     <div class="chart-with-comment">
       <div class="chart-full"><h3>Stacked quarterly flows · USD million</h3>
         <div style="position:relative;height:320px"><canvas id="bopChartCA"></canvas></div>
-        <div class="chart-note">A. Goods · B. Services · C. Primary Income · D. Secondary Income. Line = CA total. Source: SEKI 5.1.</div>
+        <div class="chart-note">Quarterly, USD million. A. Goods · B. Services · C. Primary Income · D. Secondary Income. Line = CA total. Source: SEKI 5.1, BI.</div>
       </div>
       <div class="comment-box"><div class="cb-label" id="bopCmt02label"></div><div id="bopCmt02"></div></div>
     </div>
@@ -358,7 +349,7 @@ footer{background:var(--paper-warm);border-top:1px solid var(--rule);padding:1.2
     <div class="chart-with-comment">
       <div class="chart-full"><h3>Stacked quarterly flows · USD million (positive = net inflow)</h3>
         <div style="position:relative;height:320px"><canvas id="bopChartFA"></canvas></div>
-        <div class="chart-note">1. Direct Investment · 2. Portfolio · 3. Derivatives · 4. Other Investment. Line = FA total. Source: SEKI 5.1.</div>
+        <div class="chart-note">Quarterly, USD million. 1. Direct Investment · 2. Portfolio · 3. Derivatives · 4. Other Investment. Line = FA total. Source: SEKI 5.1, BI.</div>
       </div>
       <div class="comment-box"><div class="cb-label" id="bopCmt03label"></div><div id="bopCmt03"></div></div>
     </div>
@@ -371,7 +362,7 @@ footer{background:var(--paper-warm);border-top:1px solid var(--rule);padding:1.2
         <div style="position:relative;height:220px"><canvas id="bopChartRes"></canvas></div>
         <h3 style="margin-top:1.25rem">Months of Import &amp; Official Debt Coverage</h3>
         <div style="position:relative;height:140px"><canvas id="bopChartMonths"></canvas></div>
-        <div class="chart-note">Top: sign flipped — positive = accumulation, negative = drawdown. Bottom: months of imports &amp; government external debt repayment (BI Memorandum item). Source: SEKI 5.1.</div>
+        <div class="chart-note">Quarterly, USD million. Sign flipped — positive = accumulation, negative = drawdown. Bottom: months of imports coverage. Source: SEKI 5.1, BI.</div>
       </div>
       <div class="comment-box"><div class="cb-label" id="bopCmt04label"></div><div id="bopCmt04"></div></div>
     </div>
