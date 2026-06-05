@@ -12,11 +12,12 @@
 body{background:var(--paper);color:var(--ink);font-family:'DM Sans',sans-serif;font-weight:300;font-size:15px;line-height:1.7;}
 /* ── Main nav ── */
 #mainNav{background:#1a1814;border-bottom:3px solid var(--accent);position:sticky;top:0;z-index:100;}
-.mn-inner{max-width:1200px;margin:0 auto;padding:.55rem 2rem;display:flex;align-items:center;justify-content:space-between;}
-.mn-brand{font-family:'DM Mono',monospace;font-size:12px;color:rgba(245,242,236,.85);letter-spacing:.15em;text-transform:uppercase;font-weight:500;}
-.mn-tabs{display:flex;gap:3px;}
+.mn-brand-row{max-width:1200px;margin:0 auto;padding:.6rem 2rem .4rem;}
+.mn-brand{font-family:'DM Mono',monospace;font-size:13px;color:var(--paper);letter-spacing:.2em;text-transform:uppercase;font-weight:500;}
+.mn-brand em{font-style:normal;color:var(--accent);margin-right:.6em;}
+.mn-tabs-row{max-width:1200px;margin:0 auto;padding:.3rem 2rem .5rem;display:flex;gap:3px;}
 .mn-tab{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;
-          padding:6px 22px;border-radius:3px;cursor:pointer;border:none;background:transparent;
+          padding:5px 20px;border-radius:3px;cursor:pointer;border:none;background:transparent;
           color:rgba(245,242,236,.45);transition:all .15s;}
 .mn-tab:hover{color:var(--paper);background:rgba(255,255,255,.08);}
 .mn-tab.active{background:var(--accent);color:var(--paper);}
@@ -30,7 +31,7 @@ header h1 em{font-style:italic;color:rgba(245,242,236,.6);}
 .hm{font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,242,236,.5);letter-spacing:.08em;}
 .hm span{color:rgba(245,242,236,.9);display:block;font-size:13px;margin-top:2px;}
 /* ── Window bar ── */
-.window-bar{position:sticky;top:47px;z-index:50;background:var(--paper-warm);border-bottom:1px solid var(--rule);padding:.6rem 2rem;display:flex;align-items:center;gap:1.5rem;}
+.window-bar{position:sticky;top:78px;z-index:50;background:var(--paper-warm);border-bottom:1px solid var(--rule);padding:.6rem 2rem;display:flex;align-items:center;gap:1.5rem;}
 .window-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-faint);}
 .window-btns{display:flex;gap:4px;}
 .wbtn{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;padding:4px 14px;border-radius:2px;cursor:pointer;border:1px solid var(--rule);background:var(--paper-card);color:var(--ink-light);transition:all .15s;}
@@ -89,15 +90,15 @@ footer{background:var(--paper-warm);border-top:1px solid var(--rule);padding:1.2
 <body>
 
 <div id="mainNav">
-  <div class="mn-inner">
-    <span class="mn-brand">Indonesia Economic Dashboard</span>
-    <div class="mn-tabs">
-      <button id="navGDP" class="mn-tab active" onclick="showSection('gdp')">GDP</button>
-      <button id="navBOP" class="mn-tab" onclick="showSection('bop')">BoP</button>
-      <button class="mn-tab disabled">Prices</button>
-      <button class="mn-tab disabled">Fiscal</button>
-      <button class="mn-tab disabled">Financial</button>
-    </div>
+  <div class="mn-brand-row">
+    <span class="mn-brand"><em>AAY</em>Indonesia Economic Dashboard</span>
+  </div>
+  <div class="mn-tabs-row">
+    <button id="navGDP" class="mn-tab active" onclick="showSection('gdp')">GDP</button>
+    <button id="navBOP" class="mn-tab" onclick="showSection('bop')">BoP</button>
+    <button class="mn-tab disabled">Prices</button>
+    <button class="mn-tab disabled">Fiscal</button>
+    <button class="mn-tab disabled">Financial</button>
   </div>
 </div>
 
