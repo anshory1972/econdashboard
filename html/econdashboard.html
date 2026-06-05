@@ -13,13 +13,14 @@ body{background:var(--paper);color:var(--ink);font-family:'DM Sans',sans-serif;f
 /* ── Main nav ── */
 #mainNav{background:#1a1814;border-bottom:3px solid var(--accent);position:sticky;top:0;z-index:100;}
 .mn-inner{max-width:1200px;margin:0 auto;padding:.55rem 2rem;display:flex;align-items:center;justify-content:space-between;}
-.mn-brand{font-family:'DM Mono',monospace;font-size:11px;color:rgba(245,242,236,.38);letter-spacing:.1em;}
+.mn-brand{font-family:'DM Mono',monospace;font-size:12px;color:rgba(245,242,236,.85);letter-spacing:.15em;text-transform:uppercase;font-weight:500;}
 .mn-tabs{display:flex;gap:3px;}
 .mn-tab{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;
           padding:6px 22px;border-radius:3px;cursor:pointer;border:none;background:transparent;
           color:rgba(245,242,236,.45);transition:all .15s;}
 .mn-tab:hover{color:var(--paper);background:rgba(255,255,255,.08);}
 .mn-tab.active{background:var(--accent);color:var(--paper);}
+.mn-tab.disabled{color:rgba(245,242,236,.18);cursor:default;pointer-events:none;}
 /* ── Shared header ── */
 header{background:var(--ink);color:var(--paper);padding:2.5rem 3rem 2rem;}
 .header-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:.75rem;}
@@ -92,7 +93,10 @@ footer{background:var(--paper-warm);border-top:1px solid var(--rule);padding:1.2
     <span class="mn-brand">Indonesia Economic Dashboard</span>
     <div class="mn-tabs">
       <button id="navGDP" class="mn-tab active" onclick="showSection('gdp')">GDP</button>
-      <button id="navBOP" class="mn-tab" onclick="showSection('bop')">Balance of Payments</button>
+      <button id="navBOP" class="mn-tab" onclick="showSection('bop')">BoP</button>
+      <button class="mn-tab disabled">Prices</button>
+      <button class="mn-tab disabled">Fiscal</button>
+      <button class="mn-tab disabled">Financial</button>
     </div>
   </div>
 </div>
