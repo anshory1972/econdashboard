@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Indonesia Macro · SEKI April 2026</title>
+<title>Indonesia Economic Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -89,9 +89,9 @@ footer{background:var(--paper-warm);border-top:1px solid var(--rule);padding:1.2
 
 <div id="mainNav">
   <div class="mn-inner">
-    <span class="mn-brand">Indonesia Macro Dashboards · SEKI April 2026</span>
+    <span class="mn-brand">Indonesia Economic Dashboard</span>
     <div class="mn-tabs">
-      <button id="navGDP" class="mn-tab active" onclick="showSection('gdp')">GDP Growth</button>
+      <button id="navGDP" class="mn-tab active" onclick="showSection('gdp')">GDP</button>
       <button id="navBOP" class="mn-tab" onclick="showSection('bop')">Balance of Payments</button>
     </div>
   </div>
@@ -100,13 +100,10 @@ footer{background:var(--paper-warm);border-top:1px solid var(--rule);padding:1.2
 <div id="sectionGDP">
 
 <header>
-  <div class="header-label">SEKI — Real Sector · Bank Indonesia</div>
-  <h1>Indonesia GDP Growth<br><em>Quarterly Year-on-Year, Constant 2010 Prices</em></h1>
+  <div class="header-label">Real Sector — National Accounts</div>
+  <h1>Gross Domestic Product and Its Determinants</h1>
   <div class="header-meta">
-    <div class="hm">Source <span>SEKI Bab VII · Bank Indonesia</span></div>
-    <div class="hm">Base year <span>2010 Constant Prices</span></div>
-    <div class="hm">Frequency <span>Quarterly</span></div>
-    <div class="hm">Updated <span>April 2026</span></div>
+    <div class="hm">Source <span>SEKI BI, BPS, CEIC</span></div>
   </div>
 </header>
 
@@ -142,7 +139,7 @@ footer{background:var(--paper-warm);border-top:1px solid var(--rule);padding:1.2
     <div class="chart-with-comment">
       <div class="chart-full"><h3>YoY Growth (%)</h3>
         <div style="position:relative;height:280px"><canvas id="chartGDP"></canvas></div>
-        <div class="chart-note">YoY = current quarter vs same quarter prior year. Dashed = 2015–2019 pre-COVID mean (5.03%). Source: SEKI 7.2.</div>
+        <div class="chart-note">Quarterly YoY, constant 2010 prices. Dashed = 2015–2019 pre-COVID mean (5.03%). Source: SEKI 7.2, BPS.</div>
       </div>
       <div class="comment-box"><div class="cb-label">Latest · 2026-Q1</div><div id="cmtGDPtext"></div></div>
     </div>
@@ -152,14 +149,14 @@ footer{background:var(--paper-warm);border-top:1px solid var(--rule);padding:1.2
     <div class="chart-with-comment" style="margin-bottom:1.5rem;">
       <div class="chart-wrap"><h3>YoY Growth by Component (%)</h3>
         <div style="position:relative;height:300px"><canvas id="chartExpGrowth"></canvas></div>
-        <div class="chart-note">Source: SEKI 7.4, constant 2010 prices.</div>
+        <div class="chart-note">Quarterly YoY, constant 2010 prices. Source: SEKI 7.4, BPS.</div>
       </div>
       <div class="comment-box"><div class="cb-label">Latest · 2026-Q1</div><div id="cmtExpGrowthtext"></div></div>
     </div>
     <div class="chart-with-comment">
       <div class="chart-wrap"><h3>Contribution to GDP Growth (pp)</h3>
         <div style="position:relative;height:300px"><canvas id="chartExpContrib"></canvas></div>
-        <div class="chart-note">Imports sign-reversed. Source: SEKI 7.4.</div>
+        <div class="chart-note">Quarterly, constant 2010 prices. Imports sign-reversed. Source: SEKI 7.4, BPS.</div>
       </div>
       <div class="comment-box"><div class="cb-label">Latest · 2026-Q1</div><div id="cmtExpContribtext"></div></div>
     </div>
@@ -169,14 +166,14 @@ footer{background:var(--paper-warm);border-top:1px solid var(--rule);padding:1.2
     <div class="chart-with-comment" style="margin-bottom:1.5rem;">
       <div class="chart-wrap"><h3>YoY Growth (%)</h3>
         <div style="position:relative;height:340px"><canvas id="chartHhGrowth"></canvas></div>
-        <div class="chart-note">Source: CEIC / Statistics Indonesia, constant 2010 prices.</div>
+        <div class="chart-note">Quarterly YoY, constant 2010 prices. Source: CEIC, BPS.</div>
       </div>
       <div class="comment-box"><div class="cb-label">Latest · 2026-Q1</div><div id="cmtHhGrowthtext"></div></div>
     </div>
     <div class="chart-with-comment">
       <div class="chart-wrap"><h3>Contribution to Household Consumption Growth (pp)</h3>
         <div style="position:relative;height:340px"><canvas id="chartHhContrib"></canvas></div>
-        <div class="chart-note">Source: CEIC / Statistics Indonesia.</div>
+        <div class="chart-note">Quarterly, constant 2010 prices. Source: CEIC, BPS.</div>
       </div>
       <div class="comment-box"><div class="cb-label">Latest · 2026-Q1</div><div id="cmtHhContribtext"></div></div>
     </div>
@@ -186,14 +183,14 @@ footer{background:var(--paper-warm);border-top:1px solid var(--rule);padding:1.2
     <div class="chart-with-comment" style="margin-bottom:1.5rem;">
       <div class="chart-wrap"><h3>YoY Growth (%)</h3>
         <div style="position:relative;height:340px"><canvas id="chartGfcfGrowth"></canvas></div>
-        <div class="chart-note">Source: CEIC / Statistics Indonesia.</div>
+        <div class="chart-note">Quarterly YoY, constant 2010 prices. Source: CEIC, BPS.</div>
       </div>
       <div class="comment-box"><div class="cb-label">Latest · 2026-Q1</div><div id="cmtGfcfGrowthtext"></div></div>
     </div>
     <div class="chart-with-comment">
       <div class="chart-wrap"><h3>Contribution to GFCF Growth (pp)</h3>
         <div style="position:relative;height:340px"><canvas id="chartGfcfContrib"></canvas></div>
-        <div class="chart-note">Source: CEIC / Statistics Indonesia.</div>
+        <div class="chart-note">Quarterly, constant 2010 prices. Source: CEIC, BPS.</div>
       </div>
       <div class="comment-box"><div class="cb-label">Latest · 2026-Q1</div><div id="cmtGfcfContribtext"></div></div>
     </div>
@@ -203,14 +200,14 @@ footer{background:var(--paper-warm);border-top:1px solid var(--rule);padding:1.2
     <div class="chart-with-comment" style="margin-bottom:1.5rem;">
       <div class="chart-wrap"><h3>YoY Growth by Sector (%)</h3>
         <div style="position:relative;height:480px"><canvas id="chartSecGrowth"></canvas></div>
-        <div class="chart-note">Source: SEKI 7.2, constant 2010 prices.</div>
+        <div class="chart-note">Quarterly YoY, constant 2010 prices. Source: SEKI 7.2, BPS.</div>
       </div>
       <div class="comment-box"><div class="cb-label">Latest · 2026-Q1</div><div id="cmtSecGrowthtext"></div></div>
     </div>
     <div class="chart-with-comment">
       <div class="chart-wrap"><h3>Contribution to GDP Growth (pp)</h3>
         <div style="position:relative;height:480px"><canvas id="chartSecContrib"></canvas></div>
-        <div class="chart-note">Source: SEKI 7.2.</div>
+        <div class="chart-note">Quarterly, constant 2010 prices. Source: SEKI 7.2, BPS.</div>
       </div>
       <div class="comment-box"><div class="cb-label">Latest · 2026-Q1</div><div id="cmtSecContribtext"></div></div>
     </div>
@@ -220,14 +217,14 @@ footer{background:var(--paper-warm);border-top:1px solid var(--rule);padding:1.2
     <div class="chart-with-comment" style="margin-bottom:1.5rem;">
       <div class="chart-wrap"><h3>YoY Growth by Subsector (%)</h3>
         <div style="position:relative;height:460px"><canvas id="chartMfgGrowth"></canvas></div>
-        <div class="chart-note">16 manufacturing subsectors. Source: SEKI 7.2.</div>
+        <div class="chart-note">16 subsectors, quarterly YoY, constant 2010 prices. Source: SEKI 7.2, BPS.</div>
       </div>
       <div class="comment-box"><div class="cb-label">Latest · 2026-Q1</div><div id="cmtMfgGrowthtext"></div></div>
     </div>
     <div class="chart-with-comment">
       <div class="chart-wrap"><h3>Contribution to Manufacturing Growth (pp)</h3>
         <div style="position:relative;height:460px"><canvas id="chartMfgContrib"></canvas></div>
-        <div class="chart-note">Source: SEKI 7.2.</div>
+        <div class="chart-note">Quarterly, constant 2010 prices. Source: SEKI 7.2, BPS.</div>
       </div>
       <div class="comment-box"><div class="cb-label">Latest · 2026-Q1</div><div id="cmtMfgContribtext"></div></div>
     </div>
@@ -434,8 +431,8 @@ footer{background:var(--paper-warm);border-top:1px solid var(--rule);padding:1.2
 </div><!-- /sectionBOP -->
 
 <footer>
-  <span>Indonesia Macro Dashboards · SEKI April 2026</span>
-  <span>Source: Bank Indonesia · SEKI Tables 7.2, 7.4, 5.1 · CEIC</span>
+  <span>Indonesia Economic Dashboard</span>
+  <span>Source: SEKI BI, BPS, CEIC</span>
 </footer>
 
 <script>
