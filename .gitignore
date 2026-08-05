@@ -1,0 +1,11 @@
+# Exclude everything except the html output
+*
+
+# Allow html folder and its contents
+!html/
+!html/econdashboard.html
+!html/bop.html
+!html/financial.html
+
+# Allow .gitignore itself
+!.gitignore
