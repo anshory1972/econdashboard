@@ -1,0 +1,10 @@
+# Indonesia macro dashboard — Python dependencies
+#   pip install -r requirements.txt
+#
+# xlrd must be >= 2.0: SEKI ships .xls (not .xlsx), which is exactly what
+# xlrd 2.x still supports after it dropped .xlsx handling.
+pandas>=2.0
+numpy>=1.24
+requests>=2.28
+xlrd>=2.0
+yfinance>=0.2

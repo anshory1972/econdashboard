@@ -1,11 +1,38 @@
-# Exclude everything except the html output
+# Default to excluding everything, then re-include what belongs in the repo.
+# Rationale: rawdata/ is ~42 MB of Bank Indonesia .xls and zips that any machine
+# can re-download with fetch_seki.py, so it is deliberately not tracked. What is
+# tracked is the code plus the small amount of data that cannot be regenerated.
 *
 
-# Allow html folder and its contents
+# ── Source ───────────────────────────────────────────────────────────────────
+!*.py
+!*.bat
+!requirements.txt
+!README.md
+!.gitignore
+
+# ── Published output (GitHub Pages serves these) ─────────────────────────────
 !html/
 !html/econdashboard.html
 !html/bop.html
 !html/financial.html
 
-# Allow .gitignore itself
-!.gitignore
+# ── Hand-built data that no script can regenerate ────────────────────────────
+!cleandata/
+!cleandata/*.csv
+
+# ── Never commit, regardless of anything above ───────────────────────────────
+# Secrets. fetch_gdp_bps.py reads BPS_API_KEY from here; this repo is public.
+.env
+*.env
+
+# Licensed third-party data. ceic_gdp_exp.csv is an export from a paid CEIC
+# subscription — redistributing it in a public repo would breach that licence.
+# It is also unused since GDP moved to the BPS API.
+rawdata/ceic/
+
+# Bulk source data — re-download with: python fetch_seki.py
+rawdata/
+
+# Separate sub-project with its own downloaded survey data
+econmonitor/
